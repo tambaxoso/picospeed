@@ -28,7 +28,11 @@ struct interrupt_t
     detach(pin);
     if (isValid())
     {
+      #ifdef ARDUINO_ARCH_RP2040
+      attachInterrupt(pin, callback, (PinStatus)(edge));
+      #else
       attachInterrupt(digitalPinToInterrupt(pin), callback, edge);
+      #endif
     }
   }  
 

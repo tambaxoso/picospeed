@@ -48,6 +48,7 @@ storage_api_t getBoardStorageApi(void);
 // Shared building blocks for the board headers
 #define _ANALOG_PINS_A0_A8  A0, A1, A2, A3, A4, A5, A6, A7, A8
 #define _ANALOG_PINS_A0_A14  _ANALOG_PINS_A0_A8, A9, A10, A11, A12, A13, A14
+#define _ANALOG_PINS_RP2040  A0, A1, A2, A3
 ///@endcond 
 
 // Include a specific header for a board.
@@ -63,6 +64,8 @@ storage_api_t getBoardStorageApi(void);
   #include "board_stm32_official.h"
 #elif defined(__SAME51J19A__)
   #include "board_same51.h"
+#elif defined(ARDUINO_ARCH_RP2040)
+  #include "board_RP2040.h"
 // Allow external injection of the board definition via compiler flags
 #elif defined(EXTERNAL_BOARD_H)
   #include EXTERNAL_BOARD_H

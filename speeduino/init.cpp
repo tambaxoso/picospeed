@@ -191,7 +191,9 @@ void initialiseAll(void)
       //First time running on this board
       setTuneToEmpty();
       configPage4.triggerTeeth = 4; //Avoiddiv by 0 when start decoders
+      #ifndef CUSTOM_BOARD
       configPage2.pinMapping = 3; //Force board to v0.4
+      #endif
     }
     setPinMapping(configPage2.pinMapping);
 
@@ -836,13 +838,15 @@ void setPinMapping(byte boardID)
   uint8_t MC33810InjBits[8];
   uint8_t MC33810IgnBits[8];
 #endif
-
+#ifdef ARDUINO_ARCH_RP2040
+  #define SMALL_FLASH_MODE
+#endif
   switch (boardID)
   {
     //Note: Case 0 (Speeduino v0.1) was removed in Nov 2020 to handle default case for blank FRAM modules
 
     case 1:
-    #ifndef SMALL_FLASH_MODE //No support for bluepill here anyway
+    #if !defined(SMALL_FLASH_MODE) //No support for bluepill here anyway
       //Pin mappings as per the v0.2 shield
       pinInjector1 = 8; //Output pin injector 1 is on
       pinInjector2 = 9; //Output pin injector 2 is on
@@ -1161,6 +1165,30 @@ void setPinMapping(byte boardID)
         pinFlex = PC14; // Flex sensor (Must be external interrupt enabled)
         pinTrigger = PC13; //The CAS pin also led pin so bad idea
         pinTrigger2 = PC15; //The Cam Sensor pin
+      #elif defined(ARDUINO_ARCH_RP2040)
+        pinTrigger   = 0U;
+        pinTrigger2  = 1U;
+        pinCoil1     = 2U;
+        pinCoil2     = 3U;
+        pinCoil3     = 4U;
+        pinCoil4     = 5U;
+        pinInjector1 = 6U;
+        pinInjector2 = 7U;
+        pinInjector3 = 8U;
+        pinInjector4 = 9U;
+
+        pinIdle1     = 10U;
+        pinFan       = 11U;
+        pinFuelPump  = 12U;
+        pinTachOut   = 13U;
+
+        pinIAT       = A0;
+        pinCLT       = A1;
+        pinTPS       = A2;
+        pinMAP       = A3;
+        pinBaro      = NOPIN;
+        pinO2        = NOPIN;
+        pinBat       = NOPIN; 
       #endif
       break;
 
@@ -1693,6 +1721,7 @@ void setPinMapping(byte boardID)
       break;
 
     case 42:
+    
       //Pin mappings for all BlitzboxBL49sp variants
       pinInjector1 = 6; //Output pin injector 1
       pinInjector2 = 7; //Output pin injector 2
@@ -2261,6 +2290,34 @@ void setPinMapping(byte boardID)
     #endif
       break;
 
+    case 80:
+    #if defined(ARDUINO_ARCH_RP2040)
+        pinTrigger   = 0U;
+        pinTrigger2  = 1U;
+        pinCoil1     = 2U;
+        pinCoil2     = 3U;
+        pinCoil3     = 4U;
+        pinCoil4     = 5U;
+        pinInjector1 = 6U;
+        pinInjector2 = 7U;
+        pinInjector3 = 8U;
+        pinInjector4 = 9U;
+
+        pinIdle1     = 10U;
+        pinFan       = 11U;
+        pinFuelPump  = 12U;
+        pinTachOut   = 13U;
+
+        pinIAT       = A0;
+        pinCLT       = A1;
+        pinTPS       = A2;
+        pinMAP       = A3;
+        pinBaro      = NOPIN;
+        pinO2        = NOPIN;
+        pinBat       = NOPIN; 
+    #endif
+      break;
+
     default:
       #if defined(STM32F407xx)
       //Pin definitions for experimental board Tjeerd 
@@ -2407,6 +2464,9 @@ void setPinMapping(byte boardID)
       break;
   }
 
+#ifdef ARDUINO_ARCH_RP2040
+  #undef SMALL_FLASH_MODE
+#endif
   //Setup any devices that are using selectable pins
 
   if ( (configPage6.launchPin != 0) && (configPage6.launchPin < BOARD_MAX_IO_PINS) ) { pinLaunch = pinTranslate(configPage6.launchPin); }
@@ -2577,6 +2637,16 @@ void setPinMapping(byte boardID)
     pinMode(pinCLT, INPUT_DISABLE);
     pinMode(pinBat, INPUT_DISABLE);
     pinMode(pinBaro, INPUT_DISABLE);
+  #elif defined(ARDUINO_ARCH_RP2040)
+    //Teensy 4.1 has a weak pull down resistor that needs to be disabled for all analog pins. 
+    pinMode(pinMAP, INPUT);
+    pinMode(pinTPS, INPUT);
+    pinMode(pinIAT, INPUT);
+    pinMode(pinCLT, INPUT);
+    //pinMode(pinBat, INPUT_DISABLE);
+    //pinMode(pinO2, INPUT_DISABLE);
+    //pinMode(pinO2_2, INPUT_DISABLE);
+    //pinMode(pinBaro, INPUT_DISABLE);
   #endif
 
   //Each of the below are only set when their relevant function is enabled. This can help prevent pin conflicts that users aren't aware of with unused functions

@@ -137,7 +137,7 @@ typedef struct {
 
 typedef struct {
   uint16_t pinChipSelect;
-  SPIClass SPIport;
+  SPIClass* SPIport;
 } Flash_SPI_Config;
 
 //Base class for flash read and write. SPI and internal flash inherit from this class. 
