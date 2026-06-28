@@ -65,7 +65,7 @@ storage_api_t getBoardStorageApi(void);
 #elif defined(__SAME51J19A__)
   #include "board_same51.h"
 #elif defined(ARDUINO_ARCH_RP2040)
-  #include "board_RP2040.h"
+  #include "board_rp2040.h"
 // Allow external injection of the board definition via compiler flags
 #elif defined(EXTERNAL_BOARD_H)
   #include EXTERNAL_BOARD_H
