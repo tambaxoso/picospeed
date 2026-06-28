@@ -151,7 +151,8 @@ static bool isWmiTankEmpty(void)
 {
   if (configPage10.wmiEmptyEnabled) 
   {
-    return (configPage10.wmiEmptyPolarity) ? digitalRead(pinWMIEmpty) : !digitalRead(pinWMIEmpty);
+    bool pinState = (digitalRead(pinWMIEmpty) == HIGH);
+    return configPage10.wmiEmptyPolarity ? pinState : !pinState;
   }
   return true;
 }
