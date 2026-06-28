@@ -3,7 +3,6 @@
 #include <Arduino.h>
 
 
-#define RTC_LIB_H "Hardware/rtc.h"
 #define USE_PIO_PIN
 #ifndef LED_BUILTIN
   #define LED_BUILTIN 25
