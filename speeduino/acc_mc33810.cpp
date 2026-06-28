@@ -27,17 +27,22 @@ struct mc33810_t
 
     uint8_t sendCommand(uint16_t command);
     
-    void setBit(uint8_t bit)
+        void setBit(uint8_t bit)
     {
         BIT_SET(requestedState, bit); 
-        returnState = sendCommand(word(MC33810_ONOFF_CMD, requestedState));        
+        // Menggabungkan byte secara manual menggunakan bitwise OR dan bit shifting (Aman untuk AVR & RP2040)
+        uint16_t cmd = (static_cast<uint16_t>(MC33810_ONOFF_CMD) << 8) | requestedState;
+        returnState = sendCommand(cmd);        
     }
     
     void clearBit(uint8_t bit)
     {
         BIT_CLEAR(requestedState, bit); 
-        returnState = sendCommand(word(MC33810_ONOFF_CMD, requestedState));        
+        // Menggabungkan byte secara manual menggunakan bitwise OR dan bit shifting (Aman untuk AVR & RP2040)
+        uint16_t cmd = (static_cast<uint16_t>(MC33810_ONOFF_CMD) << 8) | requestedState;
+        returnState = sendCommand(cmd);        
     }
+
 };
 
 // RAII scope guard for MC33810 active/inactive
