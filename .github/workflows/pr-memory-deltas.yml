@@ -74,6 +74,15 @@ jobs:
                 version: 1.2.0
               - name: SdFat
               - name: elapsedMillis
+          - fqbn: rp2040:rp2040:vccgnd_yd_rp2040
+            artifact-name-suffix: rp2040-avr-rp2040
+            platform: |
+              - source-url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+                name: rp2040:rp2040
+            compile-flags: -DPLATFORMIO -DARDUINO_ARCH_RP2040 -DUSE_LIBDIVIDE -std=gnu++14
+            lib_deps: |
+              # Dikosongkan atau hanya isi library bawaan jika ada, karena SdFat tidak digunakan
+
 
     steps:
       - name: Checkout repository
