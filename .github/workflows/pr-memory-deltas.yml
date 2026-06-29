@@ -79,11 +79,11 @@ jobs:
             platform: |
               - source-url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
                 name: rp2040:rp2040
-            compile-flags: -DARDUINO_ARCH_RP2040 -O3
+            compile-flags: -DPLATFORMIO -DARDUINO_ARCH_RP2040 -std=c++17
             lib_deps: |
               # Dikosongkan atau hanya isi library bawaan jika ada, karena SdFat tidak digunakan
             build_settings:
-            build_src_filter: +<*> -<src/SPIAsEEPROM/> +<src/rp2040_io/>
+            build_src_filter: +<*> -<src/SPIAsEEPROM/>
 
     steps:
       - name: Checkout repository
