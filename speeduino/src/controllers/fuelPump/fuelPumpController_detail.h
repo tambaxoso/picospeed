@@ -4,6 +4,7 @@
 #include "../../pins/fastOutputPin.h"
 #include "../../pins/outputPin.h"
 
+
 namespace fuelPumpController {
 
 namespace detsil {

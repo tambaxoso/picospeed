@@ -58,6 +58,7 @@ void doSystemReset() { return rp2040.reboot(); }
 void jumpToBootloader() { return rp2040.rebootToBootloader(); }
 void initBoard(uint32_t baudRate)
 {
+  Serial.begin(115200);
   initEEPROM();
 }
 

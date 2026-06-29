@@ -1,29 +1,26 @@
 #pragma once
 #include "port_pin.h"
-
+#include "../rp2040_io/picospeed_io.h"
 /** 
- * @brief A class for input pin operations that is faster than standard Arduino digitalRead() 
- * 
- * Call setPin() to initialize the pin, then call isPinHigh() to check if the pin is set high.
+ * @brief Sebuah class untuk operasi input pin yang lebih cepat dari digitalRead().
+ * Di RP2040, ini membaca register input SIO secara atomik dalam 1 siklus clock.
  */
 class fastInputPin_t 
 {
 public:
-  /** @brief Set the input pin */
+  /** @brief Inisialisasi pin input */
   void setPin(uint8_t pin, uint8_t mode = INPUT);
 
-  /** @brief Check if the pin is set high */
+  /** @brief Cek apakah pin bernilai HIGH */
   bool isPinHigh(void) const;
 
-  /** @brief Check if the pin is set low */
-  bool isPinLow(void) const
-  {
+  /** @brief Cek apakah pin bernilai LOW */
+  bool isPinLow(void) const {
     return !isPinHigh();
   }
 
-  /** @brief Is the pin set? */
-  bool isValid(void) const
-  {
+  /** @brief Cek apakah status nomor pin valid */
+  bool isValid(void) const {
     return _port_pin.isValid();
   }
 

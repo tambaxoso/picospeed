@@ -16,7 +16,8 @@
 ***********************************************************************************************************
 * General
 */
-  #define CUSTOM_BOARD //Disable force to use board 0.4 on Init.cpp
+  //#define ATOMIC
+  //#define CUSTOM_BOARD //Disable force to use board 0.4 on Init.cpp
   #define TS_SERIAL_BUFFER_SIZE (256+7+1) //Size of the serial buffer used by new comms protocol. For SD transfers this must be at least 512 + 1 (flag) + 4 (sector)
   #define FPU_MAX_SIZE 0 //Size of the FPU buffer. 0 means no FPU.
   
@@ -53,10 +54,9 @@
 
   #define SECONDARY_SERIAL_T SerialUART
   constexpr uint8_t ANALOG_PINS[] = { _ANALOG_PINS_RP2040 };
-  class fastInputPin_t;
-  using boardInputPin_t = fastInputPin_t;
-  class fastOutputPin_t;
-  using boardOutputPin_t = fastOutputPin_t;
+  class PicospeedPin;
+  using boardInputPin_t = PicospeedPin;
+  using boardOutputPin_t = PicospeedPin;
 
 /*
 ***********************************************************************************************************

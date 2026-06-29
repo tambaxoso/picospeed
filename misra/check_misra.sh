@@ -64,16 +64,30 @@ cppcheck_parameters=( --inline-suppr
                       --suppress=missingIncludeSystem:*
                       --suppress=unmatchedSuppression:*
                       --suppress=cstyleCast:*
-                      --platform=avr8
+                      #--platform=avr8
+                      #--cppcheck-build-dir="$out_folder"
+                      #-j "$num_cores"
+                      #-DCORE_AVR=1
+                      #-D__AVR_ATmega2560__
+                      #-DARDUINO_AVR_MEGA2560 
+                      #-DF_CPU=16000000L 
+                      #-DARDUINO_ARCH_AVR 
+                      #-DARDUINO=10808 
+                      #-DAVR=1
+                      --platform=arm32_wchar16
                       --cppcheck-build-dir="$out_folder"
                       -j "$num_cores"
-                      -DCORE_AVR=1
-                      -D__AVR_ATmega2560__
-                      -DARDUINO_AVR_MEGA2560 
-                      -DF_CPU=16000000L 
-                      -DARDUINO_ARCH_AVR 
-                      -DARDUINO=10808 
-                      -DAVR=1
+                      -DARDUINO_ARCH_RP2040=1
+                      -DPICO_BOARD="pico"
+                      -D__ARM_ARCH_6M__=1
+                      -DF_CPU=133000000L
+                      -DARDUINO=10808
+                      -Dbyte=uint8_t
+                      -Duint32_t="unsigned int"
+                      -Duint16_t="unsigned short"
+                      -Duint8_t="unsigned char"
+                      -i $source_folder/src/rp2040pio
+
                       # This is defined in the AVR headers, which aren't included.
                       # cppcheck will not do type checking on unknown types.
                       # It's used a lot and it's unsigned, which can trigger a lot

@@ -1,0 +1,28 @@
+.program engine_core
+
+; --- STATE MACHINE 0 & 1: UNIVERSAL DECODER ---
+; Menghitung waktu jeda antar gigi (ticks)
+public entry_crank:
+  mov x, ~null         ; Isi X dengan 0xFFFFFFFF
+wait_low:
+  jmp pin, tooth_detected ; Jika pin HIGH, ada gigi
+  jmp x-- wait_low     ; Kurangi counter (hitung waktu)
+  jmp wait_low
+
+tooth_detected:
+  in x, 32             ; Kirim sisa ticks ke ISR
+  push noblock         ; Lempar ke FIFO CPU Core 1
+  wait 0 pin 0         ; Tunggu sinyal kembali LOW
+  jmp entry_crank      ; Reset untuk gigi berikutnya
+
+; --- STATE MACHINE 2 & 3: ENGINE OUTPUT ---
+; Menerima paket [28-bit Durasi | 4-bit Masker]
+public entry_output:
+.wrap_target
+  pull block           ; Tunggu data dari CPU
+  out pins, 4          ; Nyalakan pin sesuai bitmask (Bit 0-3)
+  out x, 28            ; Ambil 28 bit sisa sebagai durasi ke X
+lp:
+  jmp x-- lp           ; Hitung mundur sampai durasi habis
+  mov pins, null       ; Matikan semua pin (Injektor/Koil)
+.wrap

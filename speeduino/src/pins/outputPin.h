@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include "../../board_definition.h"
-
+#include "../rp2040_io/picospeed_io.h"
 /** 
  * @brief A class for output pin operations. Must have same signature as fastOutputPin_t to allow for interchangeable use.
  * 

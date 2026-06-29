@@ -19,6 +19,7 @@ namespace type_detection_detail {
 
 /// @brief A structure to support direct port manipulation
 /// @see https://docs.arduino.cc/retired/hacking/software/PortManipulation/ 
+
 struct port_pin_t
 {
   /** @brief The return type of a "call" to portOutputRegister() */
