@@ -1,6 +1,5 @@
-#include <Arduino.h>
+
 #include "engine_rp2040.h"
-#include "globals.h"
 #include "hardware/pio.h"
 #include "hardware/sync.h"
 #include "pico/multicore.h"
