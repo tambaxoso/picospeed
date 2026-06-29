@@ -19,7 +19,7 @@ env:
       version: "1.41"
     - name: avr-fast-div
       version: "1.4.0"
-  COMMON_BUILD_FLAGS: -I./speeduino/ -I./src/ -I./lib/
+    COMMON_BUILD_FLAGS: "-I${{ github.workspace }}/speeduino/ -I${{ github.workspace }}/src/ -I${{ github.workspace }}/lib/"
 
 jobs:
   compile:
@@ -107,8 +107,8 @@ jobs:
             ${{ matrix.board.platform }}
           cli-compile-flags: | 
             - --clean
-            - --build-property 
-            - build.extra_flags=${{ env.COMMON_BUILD_FLAGS }} ${{ matrix.board.compile-flags }}
+            - --build-property
+            - "build.extra_flags=${{ env.COMMON_BUILD_FLAGS }} ${{ matrix.board.compile-flags }}"
           libraries: |
             ${{ matrix.board.lib_deps }}
             ${{ env.COMMON_LIB_DEPS }}
