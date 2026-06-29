@@ -83,7 +83,7 @@ jobs:
             lib_deps: |
               # Dikosongkan atau hanya isi library bawaan jika ada, karena SdFat tidak digunakan
             build_settings:
-            build_src_filter: +<*> -<board_native.*> -<src/SPIAsEEPROM/>
+            build_src_filter: +<*> -<board_native.*> -<src/SPIAsEEPROM/> -<src/rp2040_io/>
 
     steps:
       - name: Checkout repository
