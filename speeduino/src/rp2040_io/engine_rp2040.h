@@ -1,5 +1,5 @@
 #pragma once
-
+#if defined(ARDUINO_ARCH_RP2040)
 #include <Arduino.h>
 #include "globals.h"
 
@@ -11,3 +11,5 @@ void setup_sync_system();
 void update_engine_data_safe(uint16_t calculated_rpm, uint8_t local_sync_errors);
 void core1_check_logic(uint32_t tooth_count);
 void core0_monitor_sync();
+
+#endif

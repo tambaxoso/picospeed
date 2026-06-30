@@ -1,5 +1,6 @@
 #pragma once
 
+#if defined(ARDUINO_ARCH_RP2040)
 #include <Arduino.h>
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
@@ -83,3 +84,5 @@ public:
 private:
     uint8_t _pin;
 };
+
+#endif
