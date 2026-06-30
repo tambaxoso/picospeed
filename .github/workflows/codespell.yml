@@ -3,7 +3,7 @@ name: Run codespell
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [ master, picospeed_mod ]
   pull_request:
     branches: [ master ]
 

@@ -18,6 +18,10 @@ jobs:
           lib/ArduinoFake/
           .pio/libdeps/
           speeduino/src/SPIAsEEPROM/
+          # =========================================================================
+          # SUNTIKAN FILTER BARU: Abaikan folder I/O kustom perangkat keras RP2040 Anda
+          # =========================================================================
+          speeduino/src/rp2040_io/
           (.+/)?unity_config\.c$
           (.+/)?board_native\.(?:h|cpp)$
 

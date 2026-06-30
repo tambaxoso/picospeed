@@ -4,6 +4,8 @@ name: Unit Tests
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
+    branches: [ master, picospeed_mod ]
+  pull_request:
     branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -12,7 +14,7 @@ on:
 jobs:
   build:
     # Only try to run hardware unit tests on the upstream repository
-    if: github.repository_owner == 'speeduino'
+    if: github.repository_owner == 'tambaxoso'
 
     runs-on: ubuntu-latest
 

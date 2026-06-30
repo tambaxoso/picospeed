@@ -32,3 +32,4 @@ jobs:
     - name: Run Simulator Unit Tests
       run: | 
         platformio test -v -e megaatmega2560_sim_unittest
+        platformio run -e vccgnd_yd_rp2040 
