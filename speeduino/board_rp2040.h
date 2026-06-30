@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "src/rp2040_io/pico_fastpin.h"
 #define RTC_LIB_H  "pico/util/datetime.h"
 #define USE_PIO_PIN
 #ifndef LED_BUILTIN
@@ -54,9 +55,10 @@
 
   #define SECONDARY_SERIAL_T SerialUART
   constexpr uint8_t ANALOG_PINS[] = { _ANALOG_PINS_RP2040 };
-  class PicospeedPin;
-  using boardInputPin_t = PicospeedPin;
-  using boardOutputPin_t = PicospeedPin;
+  class pico_OutputPin_t;
+  using boardOutputPin_t = pico_OutputPin_t;
+  class pico_InputPin_t;
+  using boardInputPin_t = pico_InputPin_t;
 
 /*
 ***********************************************************************************************************
@@ -168,29 +170,34 @@ extern volatile uint32_t dummy_idle_counter;
     static inline void IGN7_TIMER_DISABLE(void)  {}
     static inline void IGN8_TIMER_DISABLE(void)  {}
 
-  /*
+/*
 ***********************************************************************************************************
-* Auxiliaries
+* Auxiliaries (RP2040 Hardware PWM Optimization)
 */
-#define ENABLE_BOOST_TIMER()  
-#define DISABLE_BOOST_TIMER() //TIMSK1 &= ~(1 << OCIE1A)
-#define ENABLE_VVT_TIMER()    //TIMSK1 |= (1 << OCIE1B)
-#define DISABLE_VVT_TIMER()   //TIMSK1 &= ~(1 << OCIE1B)
+// Menggunakan do-while(0) kosong karena hardware PWM berjalan mandiri tanpa perlu men-trigger start timer software
+#define ENABLE_BOOST_TIMER()  do { } while(0) 
+// Memaksa duty cycle ke 0% secara instan menggunakan fungsi kelas teroptimasi kita
+#define DISABLE_BOOST_TIMER() boost_pin.writePWM(0)
 
+#define ENABLE_VVT_TIMER()    do { } while(0) 
+// PERBAIKAN: Mengganti fungsi bawaan SDK yang lambat dengan fungsi kelas kita agar terintegrasi dengan logika vvtFreq & inversi
+#define DISABLE_VVT_TIMER()   do { if(pinVVT_1 != 255) pwm_set_gpio_level(pinVVT_1, 0); } while(0)
+
+// Mengarahkan register pencacah lama ke variabel dummy karena pencacahan kini dilakukan secara hardware oleh RP2040 Slice
 #define BOOST_TIMER_COMPARE   dummy_boost_compare
 #define BOOST_TIMER_COUNTER   dummy_boost_counter
 #define VVT_TIMER_COMPARE     dummy_vvt_compare
-#define VVT_TIMER_COUNTER     
+#define VVT_TIMER_COUNTER     dummy_vvt_counter
 
 /*
 ***********************************************************************************************************
-* Idle
+* Idle (RP2040 Hardware PWM Optimization)
 */
 #define IDLE_COMPARE  dummy_idle_compare
 #define IDLE_COUNTER  dummy_idle_counter
 
-#define IDLE_TIMER_ENABLE() //TIMSK1 |= (1 << OCIE1C)
-#define IDLE_TIMER_DISABLE() //TIMSK1 &= ~(1 << OCIE1C)
+#define IDLE_TIMER_ENABLE()  do { } while(0) 
+#define IDLE_TIMER_DISABLE() idle_pin.writePWM(0)
 
 /*
 ***********************************************************************************************************

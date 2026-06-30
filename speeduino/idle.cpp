@@ -51,9 +51,13 @@ static long FeedForwardTerm;
 static uint32_t idle_pwm_target_value;
 static long idle_cl_target_rpm;
 
+#if defined(ARDUINO_ARCH_RP2040)
+static boardOutputPin_t idle_pin;
+static boardOutputPin_t idle2_pin;
+#else
 static fastOutputPin_t idle_pin;
 static fastOutputPin_t idle2_pin;
-
+#endif
 constexpr table2D_u8_u8_10 iacPWMTable(&configPage6.iacBins, &configPage6.iacOLPWMVal);
 constexpr table2D_u8_u8_10 iacStepTable(&configPage6.iacBins, &configPage6.iacOLStepVal);
 //Open loop tables specifically for cranking

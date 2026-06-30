@@ -1238,6 +1238,7 @@ void boostDisable(void)
   boost_pin.setPinLow(); //Make sure solenoid is off (0% duty)
 }
 
+#if !defined(ARDUINO_ARCH_RP2040)
 //The interrupt to control the Boost PWM
 void boostInterrupt(void)
 {
@@ -1397,4 +1398,5 @@ void vvtInterrupt(void)
     fan_pwm_state = true;
   }
 }
+#endif
 #endif
