@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include "../../board_definition.h"
-#include "../rp2040_io/picospeed_io.h"
+#include "../rp2040_io/pico_fastpin.h"
 /** 
  * @brief A class for input pin operations. 
  * 

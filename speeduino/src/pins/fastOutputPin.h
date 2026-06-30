@@ -1,6 +1,6 @@
 #pragma once
 #include "port_pin.h"
-#include "../rp2040_io/picospeed_io.h"
+#include "../rp2040_io/pico_fastpin.h"
 /** 
  * @brief A class for output pin operations that is faster than standard Arduino digitalWrite() 
  * 

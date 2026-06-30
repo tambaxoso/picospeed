@@ -1,6 +1,7 @@
 #pragma once
+
 #include "port_pin.h"
-#include "../rp2040_io/picospeed_io.h"
+#include "../rp2040_io/pico_fastpin.h"
 /** 
  * @brief Sebuah class untuk operasi input pin yang lebih cepat dari digitalRead().
  * Di RP2040, ini membaca register input SIO secara atomik dalam 1 siklus clock.
