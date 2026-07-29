@@ -17,7 +17,11 @@ uint8_t interrupt_t::attach(uint8_t pin)
     _pin.setPin(pin);
     if (isValid())
     {
+        #if defined(ARDUINO_ARCH_RP2040)
+        //
+        #else
         attachInterrupt(digitalPinToInterrupt(pin), callback, edge);
+        #endif
         return pin;
     }
     return NOT_A_PIN;
@@ -26,7 +30,11 @@ uint8_t interrupt_t::attach(uint8_t pin)
 /** @brief Detach the interrupt from a pin */
 void interrupt_t::detach(uint8_t pin)
 {
+    #if defined(ARDUINO_ARCH_RP2040)
+    //
+    #else
     detachInterrupt( digitalPinToInterrupt(pin) );
+    #endif
     _pin.setPin(NOT_A_PIN);
 }  
 
