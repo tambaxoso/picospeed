@@ -137,7 +137,11 @@ typedef struct {
 
 typedef struct {
   uint16_t pinChipSelect;
+  #if defined(ARDUINO_ARCH_RP2040)
+  SPIClass* SPIport;
+  #else
   SPIClass SPIport;
+  #endif
 } Flash_SPI_Config;
 
 //Base class for flash read and write. SPI and internal flash inherit from this class. 
