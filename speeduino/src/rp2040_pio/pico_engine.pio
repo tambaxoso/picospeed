@@ -1,0 +1,145 @@
+; =============================================================================
+; PICOSPEED HARDWARE PIO CONFIGURATION (PERBAIKAN SYMMETRIC TIMING ARCHITECTURE)
+; =============================================================================
+
+.program picospeed_decoder
+    mov x, ~null            ; Reset stopwatch utama ke 0xFFFFFFFF
+.wrap_target
+
+measuring_high:
+    jmp pin high_still_high [1] ; [True] Masih HIGH, delay 1 untuk total 2 cycle
+    jmp high_ended          ; [False] Sinyal jatuh ke LOW
+high_still_high:
+    jmp x-- measuring_high  ; Kurangi counter X (Total loop = 2 cycle konstan)
+
+high_ended:
+    mov isr, null           ; Bersihkan ISR
+    set y, 1                ; Flag 1 = Transisi dari HIGH ke LOW (Falling Edge dideteksi)
+    in y, 1                 ; Masukkan flag ke Bit 31
+    in x, 31                ; Masukkan nilai sisa stopwatch X
+    push noblock            
+    mov x, ~null            ; Reset kembali stopwatch untuk mengukur masa LOW
+
+measuring_low:
+    jmp pin low_ended       ; [True] Sinyal naik ke HIGH (Rising Edge dideteksi)
+    jmp x-- measuring_low   ; [False] Masih LOW, kurangi X (Total loop = 2 cycle konstan)
+    ; Catatan: jmp x-- langsung lompat balik ke measuring_low memotong 1 instruksi bypass,
+    ; menjamin eksekusi tepat 2 cycle tanpa perlu instruksi tambahan!
+
+low_ended:
+    mov isr, null           ; Bersihkan ISR
+    set y, 0                ; Flag 0 = Transisi dari LOW ke HIGH (Rising Edge dideteksi)
+    in y, 1                 ; Masukkan flag ke Bit 31
+    in x, 31                ; Masukkan nilai sisa stopwatch X
+    push noblock            
+    mov x, ~null            ; Reset kembali stopwatch untuk mengukur masa HIGH berikutnya
+.wrap
+
+
+; =============================================================================
+; PICOSPEED OUTPUT (PERBAIKAN COMPLIANT INSTRUCTION)
+; =============================================================================
+
+.program inj_output
+.wrap_target
+    pull block              ; Word 1: Masker Silinder / Pin Injector
+    mov x, osr              
+    jmp !x inj_stuck_safe   
+
+    pull block              ; Word 2: Delay Ticks sebelum menyemprot
+    mov y, osr              
+    jmp !y start_inj        
+delay_inj_loop:
+    jmp y-- delay_inj_loop  ; Loop delay: 1 cycle per tick
+    
+start_inj:
+    pull block              ; Word 3: Durasi Penyemprotan (Pulse Width)
+    mov y, osr              
+    jmp !y inj_stuck_safe   
+
+    mov osr, x              ; Salin kembali masker pin dari X ke OSR
+    out pins, 32            ; Tembakkan masker pin injector ke hardware! (Perbaikan instruksi)
+inj_loop:
+    jmp y-- inj_loop        ; Loop durasi: 1 cycle per tick
+    
+inj_stuck_safe:
+    mov osr, null
+    out pins, 32            ; Fail-Safe: Matikan semua injector seketika
+.wrap
+
+
+.program ign_output
+.wrap_target
+    pull block              ; Word 1: Masker Koil Pengapian
+    mov x, osr              
+    jmp !x ign_stuck_safe   
+
+    pull block              ; Word 2: Delay Timing Spark
+    mov y, osr              
+    jmp !y start_dwell      
+delay_ign_loop:
+    jmp y-- delay_ign_loop  ; Loop delay timing: 1 cycle per tick
+    
+start_dwell:
+    pull block              ; Word 3: Durasi Dwell Time
+    mov y, osr              
+    jmp !y ign_stuck_safe   
+
+    mov osr, x              
+    out pins, 32            ; Mulai Dwell: Nyalakan Koil! (Perbaikan instruksi)
+dwell_loop:
+    jmp y-- dwell_loop      ; Loop dwell: 1 cycle per tick
+
+ign_stuck_safe:
+    mov osr, null           
+    out pins, 32            ; Spark / Fail-Safe: Putus arus koil seketika!
+.wrap
+
+%c-sdk {
+static inline void picospeed_decoder_program_init(PIO pio, uint sm, uint offset, uint pin, float div) {
+    pio_sm_config c = picospeed_decoder_program_get_default_config(offset);
+    
+    sm_config_set_jmp_pin(&c, pin);
+    sm_config_set_in_pins(&c, pin);
+    
+    pio_gpio_init(pio, pin);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false); // INPUT
+    
+    sm_config_set_in_shift(&c, true, false, 32);
+    sm_config_set_clkdiv(&c, div);
+    
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+// Perbaikan mutlak: Menambahkan fungsi konfigurasi set_out_pins agar instruksi 'out pins' bekerja
+static inline void inj_output_program_init(PIO pio, uint sm, uint offset, uint pin_base, uint pin_count, float div) {
+    pio_sm_config c = inj_output_program_get_default_config(offset);
+    
+    sm_config_set_out_pins(&c, pin_base, pin_count); // Wajib untuk instruksi "out pins"
+    
+    for(uint i = 0; i < pin_count; i++) {
+        pio_gpio_init(pio, pin_base + i);
+    }
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_base, pin_count, true); // OUTPUT
+    
+    sm_config_set_clkdiv(&c, div);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+static inline void ign_output_program_init(PIO pio, uint sm, uint offset, uint pin_base, uint pin_count, float div) {
+    pio_sm_config c = ign_output_program_get_default_config(offset);
+    
+    sm_config_set_out_pins(&c, pin_base, pin_count); // Wajib untuk instruksi "out pins"
+    
+    for(uint i = 0; i < pin_count; i++) {
+        pio_gpio_init(pio, pin_base + i);
+    }
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_base, pin_count, true); // OUTPUT
+    
+    sm_config_set_clkdiv(&c, div);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

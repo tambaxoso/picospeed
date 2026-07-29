@@ -1537,6 +1537,50 @@ static pinNumbers_t getFCRMicroF45Mapping(void)
 }
 #endif
 
+#if defined(PICOSPEED_V02_MAPPING)
+static pinNumbers_t getPicoSpeedMapping(void)
+{
+  pinNumbers_t pins;
+  pins.setInjectorPin(0, 2);//Output pin injector 1 is on
+  pins.setInjectorPin(1, 3);//Output pin injector 2 is on
+  pins.setInjectorPin(2, 4);//Output pin injector 3 is on
+  pins.setInjectorPin(3, 5);//Output pin injector 4 is on
+  pins.setCoilPin(0, 6);//Pin for coil 1
+  pins.setCoilPin(1, 7);//Pin for coil 2
+  pins.setCoilPin(2, 8);//Pin for coil 3
+  pins.setCoilPin(3, 9);//Pin for coil 4
+  pins.pinTrigger = 0; //The CAS pin
+  pins.pinTrigger2 = 1; //The Cam Sensor pin
+  //pins.pinTrigger3 = 23;
+  #if defined(USE_EXTERNAL_ADC)
+  pins.pinTPS = 100; //TPS input pin
+  pins.pinMAP = 101; //MAP sensor pin
+  pins.pinIAT = 102; //IAT sensor pin
+  pins.pinCLT = 103; //CLT sensor pin
+
+  pins.pinBat = A3; //Battery reference voltage pin
+  pins.pinO2  = A2; //O2 sensor pin
+  #else
+  pins.pinTPS = A0; //TPS input pin
+  pins.pinMAP = A1; //MAP sensor pin
+  pins.pinIAT = A2; //IAT sensor pin
+  pins.pinCLT = A3; //CLT sensor pin
+  #endif
+  
+  pins.pinVVT_1       = 10;
+  pins.pinVVT_2       = 11;
+  pins.pinIdle1       = 12; //Single wire idle control - NOT USED
+  pins.pinBoost       = 13; //Boost control - NOT USED
+  pins.pinFuelPump    = 14; //Fuel pump output
+  pins.pinFan         = 15; //Pin for the fan output
+  pins.pinStepperDir  = 18; //Direction pin for DRV8825 driver - NOT USED
+  pins.pinStepperStep = 19; //Step pin for DRV8825 driver - NOT USED
+  pins.pinTachOut     = 22; //Tacho output pin
+  pins.pinLaunch      = 23; //Can be overwritten below
+  return pins;
+}
+#endif
+
 pinNumbers_t getPinMapping(uint8_t boardID)
 {
 #ifndef SMALL_FLASH_MODE
@@ -1584,6 +1628,9 @@ pinNumbers_t getPinMapping(uint8_t boardID)
 #endif
 #if defined(BOARD_FCR_MICRO_F4)
     case 61: return getFCRMicroF45Mapping(); break;
+#endif
+#if defined(PICOSPEED_V02_MAPPING)
+    case 65: return getPicoSpeedMapping(); break;
 #endif
     default: break;
   }

@@ -69,7 +69,9 @@ uint8_t getPwmTimerResolution(void);
   #include "board_stm32_official.h"
 #elif defined(__SAME51J19A__)
   #include "board_same51.h"
-// Allow external injection of the board definition via compiler flags
+#elif defined(ARDUINO_ARCH_RP2040)
+  #include "board_rp2040.h"
+  // Allow external injection of the board definition via compiler flags
 #elif defined(EXTERNAL_BOARD_H)
   #include EXTERNAL_BOARD_H
 #else
