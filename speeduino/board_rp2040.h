@@ -11,7 +11,7 @@
 ***********************************************************************************************************
 * General
 */
-#define PICOSPEED_MAPPING
+#define PICOSPEED_V02_MAPPING
 #define TS_SERIAL_BUFFER_SIZE 517 //Size of the serial buffer used by new comms protocol. For SD transfers this must be at least 512 + 1 (flag) + 4 (sector)
 #define FPU_MAX_SIZE 0 //Size of the FPU buffer. 0 means no FPU.
 #define BOARD_MAX_IO_PINS  30 //digital pins + analog channels + 1
