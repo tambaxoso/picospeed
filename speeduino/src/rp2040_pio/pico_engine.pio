@@ -3,14 +3,16 @@
 ; =============================================================================
 
 .program picospeed_decoder
-    mov x, ~null            ; Reset stopwatch utama ke 0xFFFFFFFF
+    mov x, ~null            ; Reset stopwatch utama ke 0xFFFFFFFF (32-bit max)
 .wrap_target
 
 measuring_high:
-    jmp pin high_still_high [1] ; [True] Masih HIGH, delay 1 untuk total 2 cycle
+    jmp pin high_still_high [1] ; [True] Masih HIGH, delay 1 untuk total 2 cycle per loop
     jmp high_ended          ; [False] Sinyal jatuh ke LOW
 high_still_high:
     jmp x-- measuring_high  ; Kurangi counter X (Total loop = 2 cycle konstan)
+    ; Failsafe jika X habis (0) saat mesin macet di posisi HIGH:
+    jmp measuring_high      ; Tetap di loop high sampai pin berubah LOW
 
 high_ended:
     mov isr, null           ; Bersihkan ISR
@@ -23,8 +25,8 @@ high_ended:
 measuring_low:
     jmp pin low_ended       ; [True] Sinyal naik ke HIGH (Rising Edge dideteksi)
     jmp x-- measuring_low   ; [False] Masih LOW, kurangi X (Total loop = 2 cycle konstan)
-    ; Catatan: jmp x-- langsung lompat balik ke measuring_low memotong 1 instruksi bypass,
-    ; menjamin eksekusi tepat 2 cycle tanpa perlu instruksi tambahan!
+    ; KOREKSI UTAMA: Failsafe jika X habis (0) saat mesin macet di posisi LOW:
+    jmp measuring_low       ; Mengunci eksekusi di loop low, mencegah kebocoran ke low_ended
 
 low_ended:
     mov isr, null           ; Bersihkan ISR

@@ -13,36 +13,38 @@
 // ----------------- //
 
 #define picospeed_decoder_wrap_target 1
-#define picospeed_decoder_wrap 17
+#define picospeed_decoder_wrap 19
 #define picospeed_decoder_pio_version 0
 
 static const uint16_t picospeed_decoder_program_instructions[] = {
     0xa02b, //  0: mov    x, ~null
             //     .wrap_target
     0x01c3, //  1: jmp    pin, 3                 [1]
-    0x0004, //  2: jmp    4
+    0x0005, //  2: jmp    5
     0x0041, //  3: jmp    x--, 1
-    0xa0c3, //  4: mov    isr, null
-    0xe041, //  5: set    y, 1
-    0x4041, //  6: in     y, 1
-    0x403f, //  7: in     x, 31
-    0x8000, //  8: push   noblock
-    0xa02b, //  9: mov    x, ~null
-    0x00cc, // 10: jmp    pin, 12
-    0x004a, // 11: jmp    x--, 10
-    0xa0c3, // 12: mov    isr, null
-    0xe040, // 13: set    y, 0
-    0x4041, // 14: in     y, 1
-    0x403f, // 15: in     x, 31
-    0x8000, // 16: push   noblock
-    0xa02b, // 17: mov    x, ~null
+    0x0001, //  4: jmp    1
+    0xa0c3, //  5: mov    isr, null
+    0xe041, //  6: set    y, 1
+    0x4041, //  7: in     y, 1
+    0x403f, //  8: in     x, 31
+    0x8000, //  9: push   noblock
+    0xa02b, // 10: mov    x, ~null
+    0x00ce, // 11: jmp    pin, 14
+    0x004b, // 12: jmp    x--, 11
+    0x000b, // 13: jmp    11
+    0xa0c3, // 14: mov    isr, null
+    0xe040, // 15: set    y, 0
+    0x4041, // 16: in     y, 1
+    0x403f, // 17: in     x, 31
+    0x8000, // 18: push   noblock
+    0xa02b, // 19: mov    x, ~null
             //     .wrap
 };
 
 #if !PICO_NO_HARDWARE
 static const struct pio_program picospeed_decoder_program = {
     .instructions = picospeed_decoder_program_instructions,
-    .length = 18,
+    .length = 20,
     .origin = -1,
     .pio_version = picospeed_decoder_pio_version,
 #if PICO_PIO_VERSION > 0
