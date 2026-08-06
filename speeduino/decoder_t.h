@@ -44,10 +44,7 @@ struct interrupt_t
         && _pin.isValid();
   }
 
-  bool isPinHigh(void) const {
-    return _pin.isPinHigh();
-  }
-
+  bool isPinHigh(void) const;
   boardInputPin_t _pin;
 };
 

@@ -298,21 +298,38 @@ static decoder_status_t sharedGetStatus(void) noexcept
 
 static uint16_t timeToAngleIntervalTooth(uint32_t time)
 {
+#if defined(PICO_RP2040) || defined(ARDUINO_ARCH_RP2040)
+    // PILIHAN PERTAMA: Jalur Akselerasi Presisi Tinggi (Murni Berbasis Ticks dari FIFO)
+    if(decoderStatus.toothAngleIsCorrect)
+    {
+      // Ambil nilai duration_ticks Crank terbaru langsung dari fungsi driver
+      extern uint32_t pio_get_last_crank_ticks(void);
+      uint32_t toothTicks = pio_get_last_crank_ticks();
+
+      // Failsafe jika mesin baru start / macet agar tidak terjadi pembagian dengan nol
+      if (toothTicks == 0) { return timeToAngle(time); }
+
+      // 1 uS = 100 Ticks pada kecepatan clock DECODER_CLK_HZ (100MHz)
+      uint32_t inputTicks = time * 100UL;
+      uint16_t tempTriggerToothAngle = triggerToothAngle;
+
+      // Kalkulasi murni berbasis perbandingan Ticks perangkat keras
+      return (uint64_t)(inputTicks * (uint32_t)tempTriggerToothAngle) / toothTicks;
+    }
+#else
+    // Jalur bawaan asli untuk AVR Mega / Board selain RP2040
     noInterrupts();
-    //Still uses a last interval method (ie retrospective), but bases the interval on the gap between the 2 most recent teeth rather than the last full revolution
     if(decoderStatus.toothAngleIsCorrect)
     {
       unsigned long toothTime = (toothLastToothTime - toothLastMinusOneToothTime);
-      uint16_t tempTriggerToothAngle = triggerToothAngle; // triggerToothAngle is set by interrupts
+      uint16_t tempTriggerToothAngle = triggerToothAngle; 
       interrupts();
 
+      if (toothTime == 0) { return timeToAngle(time); }
       return (unsigned long)(time * (uint32_t)tempTriggerToothAngle) / toothTime;
     }
-    else { 
-      interrupts();
-      //Safety check. This can occur if the last tooth seen was outside the normal pattern etc
-      return timeToAngle(time);
-    }
+#endif
+    return timeToAngle(time);
 }
 
 static inline bool IsCranking(const statuses &status) {
@@ -351,6 +368,11 @@ static void sharedDecoderReset(void) {
   decoderStatus.syncStatus = SyncStatus::None;
   triggerFilterTime = 0;
   decoderStatus.validTrigger = false;
+  #if defined(PICO_RP2040) || defined(ARDUINO_ARCH_RP2040)
+  // Perintah Murni: Perintahkan hardware driver untuk mengosongkan seluruh sisa ticks
+  extern void pio_reset_hardware_ticks(void);
+  pio_reset_hardware_ticks();
+#endif
 }
 
 TESTABLE_STATIC __attribute__((noinline)) bool SetRevolutionTime(uint32_t revTime)
@@ -442,6 +464,33 @@ For a missing tooth wheel, this is the number if the tooth had NOT been missing 
 */
 static __attribute__((noinline)) int crankingGetRPM(byte totalTeeth, bool isCamTeeth)
 {
+  #if defined(PICO_RP2040) || defined(ARDUINO_ARCH_RP2040)
+  // 1. Jalur Akselerasi Presisi Tinggi RP2040 (Murni Berbasis Ticks Hasil Polling FIFO)
+  if( (currentStatus.startRevolutions >= configPage4.StgCycles) && (decoderStatus.syncStatus!=SyncStatus::None) )
+  {
+    // Ambil data total duration_ticks gigi roda terakhir langsung dari fungsi eksternal driver PIO Anda
+    extern uint32_t pio_get_last_crank_ticks(void);
+    uint32_t toothTicks = pio_get_last_crank_ticks();
+
+    // Failsafe mencegah pembagian dengan nol jika mesin baru pertama kali dialiri arus listrik
+    if (toothTicks > 0)
+    {
+      // 1 Ticks = 10 nanodetik pada clock DECODER_CLK_HZ (100MHz).
+      // Untuk mengonversinya ke satuan mikrodetik (uS) bawaan Speeduino, kita bagi ticks dengan 100.
+      uint32_t toothTimeMicros = toothTicks / 100UL;
+
+      if (toothTimeMicros > 0) {
+        // Karena sistem penguncian atomik Anda sudah dialihkan menggunakan SPINLOCK yang aman,
+        // kita bisa langsung memanggil SetRevolutionTime dengan aman tanpa noInterrupts()
+        bool newRevtime = SetRevolutionTime((toothTimeMicros * totalTeeth) >> (isCamTeeth ? 1U : 0U));
+        if (newRevtime) {
+          return RpmFromRevolutionTimeUs(currentStatus.revolutionTime);
+        }
+      }
+    }
+  }
+#else
+  // 2. Jalur Bawaan Asli Universal untuk Board Non-RP2040 (AVR Mega, dll)
   if( (currentStatus.startRevolutions >= configPage4.StgCycles) && (decoderStatus.syncStatus!=SyncStatus::None) )
   {
     if((toothLastMinusOneToothTime > 0) && (toothLastToothTime > toothLastMinusOneToothTime) )
@@ -454,6 +503,7 @@ static __attribute__((noinline)) int crankingGetRPM(byte totalTeeth, bool isCamT
       }
     }
   }
+#endif
 
   return currentStatus.RPM;
 }

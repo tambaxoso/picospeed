@@ -23,18 +23,15 @@
 #define DECODER_CLK_HZ        100000000.0f
 #define OUTPUT_CLK_HZ         200000000.0f
 
-struct PioDecoderData {
-    uint32_t duration_ticks; // Durasi pulsa (elapsed time)
-    uint8_t edge_type;       // Mengembalikan makro FALLING atau RISING
-};
-struct TriggerShadowState {
-    volatile bool is_high;
-    volatile bool is_triggered;
-    volatile uint8_t detected_edge;
-    volatile uint32_t last_period_us;
-};
+using callback_t = void(*)(void);
 
-void pio_driver_init(void);
-bool pio_decoder_read(PIO pio, uint sm, PioDecoderData &output);
+struct PioDecoderData {
+    uint32_t duration_ticks;
+    uint8_t edge_type;
+};
+void pio_trigger_init(uint8_t pin, uint8_t edge, callback_t callback );
+bool pio_decoder_read(uint8_t pin, PioDecoderData &output);
+void pio_inj_init(void);
+void pio_ign_init(void);
 
 #endif
